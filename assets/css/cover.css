@@ -161,3 +161,12 @@ body {
     width: 700px;
   }
 }
+
+img {
+  height: 20px;
+}
+.alert {
+  text-shadow: none;
+  font-weight: bold;
+  font-size: large;
+}
