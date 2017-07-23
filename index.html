@@ -22,7 +22,11 @@
 
     <!-- Custom styles for this template -->
     <link href="./assets/css/cover.css" rel="stylesheet">
-
+    <style>
+      img {
+        height: 20px;
+      }
+    </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -63,21 +67,103 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="./assets/js/jquery.min.js"></script>
     <script>
+      function displayCoins(coin_str) {
+        $('ul').append('<li>' + coin_str + '</li>');
+      }
       $(function () {
+        // clear feedback when input value changes
         $('input').on('input', function () {
           $('#feedback').removeClass('alert-danger').addClass('hidden').html('');
         });
+        // form submission
         $('form').on('submit', function (e) {
           e.preventDefault();
-          var error;
-          if (!$('input').val().trim()) {
+          var error,
+            // get trimmed input value
+            money = $('input').val().trim();
+          if (!money) {
             error = 'Empty entry!';
           }
+          else {
+            // check invalid characters
+            if (money.match(/[^£\.p0-9]/g))
+              error = 'Invalid character';
+            // check digits exists
+            else if (!money.match(/[0-9]/g))
+              error = 'Missing value';
+            // check value contains £ but not at the beginning
+            else if ((!money.startsWith('£') && money.indexOf('£') !== -1)
+              // or value contains p but not at the end
+              || (!money.endsWith('p') && money.indexOf('p') !== -1)
+              // or there are more than one £ in the value
+              || money.indexOf('£') !== money.lastIndexOf('£')
+              // or there are more than one p in the value
+              || money.indexOf('p') !== money.lastIndexOf('p'))
+              error = 'Valid character in the wrong position';
+          }
 
+          // set error has feedback
           if (error) {
             $('#feedback').addClass('alert-danger').removeClass('hidden').html(error);
             return;
           }
+
+          $('#feedback').addClass('alert-info').removeClass('hidden')
+            .html('<img src="./assets/img/loading.gif" /><ul class="nav nav-stacked"></ul>');
+
+          // remove £ and p
+          money = money.replace(/[£p]/g, '');
+          // convert to pence integer
+          money = money.indexOf('.') !== -1
+            ? Number(Math.round(money + 'e2') + 'e-2') * 100
+            : parseInt(money);
+
+          while (true) {
+            // check £2
+            if (money >= 200) {
+              displayCoins(Math.floor(money / 200) + ' x £2');
+              money = money % 200;
+            }
+            // check £1
+            else if (money >= 100) {
+              displayCoins(Math.floor(money / 100) + ' x £1');
+              money = money % 100;
+            }
+            // check 50p
+            else if (money >= 50) {
+              displayCoins(Math.floor(money / 50) + ' x 50p');
+              money = money % 50;
+            }
+            // check 20p
+            else if (money >= 20) {
+              displayCoins(Math.floor(money / 20) + ' x 20p');
+              money = money % 20;
+            }
+            // check 10p
+            else if (money >= 10) {
+              displayCoins(Math.floor(money / 10) + ' x 10p');
+              money = money % 10;
+            }
+            // check 5p
+            else if (money >= 5) {
+              displayCoins(Math.floor(money / 5) + ' x 5p');
+              money = money % 5;
+            }
+            // check 2p
+            else if (money >= 2) {
+              displayCoins(Math.floor(money / 2) + ' x 2p');
+              money = money % 2;
+            }
+            // check 1p
+            else if (money >= 1) {
+              displayCoins(money + ' x 1p');
+              break;
+            }
+            else break;
+          }
+          $('#feedback').addClass('alert-success')
+            .removeClass('alert-info')
+            .find('img').remove();
         });
       });
     </script>
